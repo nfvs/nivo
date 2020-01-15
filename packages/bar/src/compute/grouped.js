@@ -22,7 +22,7 @@ import { getIndexedScale } from './common'
  * @param {Array.<number>} range
  * @returns {Function}
  */
-export const getGroupedScale = (data, keys, _minValue, _maxValue, range) => {
+export const getGroupedScale = (data, keys, _minValue, _maxValue, range, round) => {
     const allValues = data.reduce((acc, entry) => [...acc, ...keys.map(k => entry[k])], [])
 
     let maxValue = _maxValue
@@ -37,7 +37,7 @@ export const getGroupedScale = (data, keys, _minValue, _maxValue, range) => {
     }
 
     return scaleLinear()
-        .rangeRound(range)
+        .call(round ? 'rangeRound' : 'round')(range)
         .domain([minValue, maxValue])
 }
 
@@ -146,9 +146,10 @@ export const generateHorizontalGroupedBars = ({
     getColor,
     padding = 0,
     innerPadding = 0,
+    roundRange = true
 }) => {
     const xRange = reverse ? [width, 0] : [0, width]
-    const xScale = getGroupedScale(data, keys, minValue, maxValue, xRange)
+    const xScale = getGroupedScale(data, keys, minValue, maxValue, xRange, roundRange)
     const yScale = getIndexedScale(data, getIndex, [height, 0], padding)
 
     const barHeight = (yScale.bandwidth() - innerPadding * (keys.length - 1)) / keys.length
